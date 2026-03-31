@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр 3: Эксперт кассовых операций + Магазин подарков</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(145deg, #e0eaf4 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .trainer-container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 48px;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+        
+        .header-stats {
+            background: #f8fafc;
+            padding: 20px 28px;
+            border-bottom: 2px solid #eef2f6;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .progress-area {
+            background: #eef2ff;
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .wallet {
+            background: linear-gradient(135deg, #f9d976, #f39f86);
+            padding: 8px 20px;
+            border-radius: 60px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .balance-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #2d1b00;
+        }
+        
+        .coins-stack {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .coin-icon {
+            width: 32px;
+            height: 32px;
+            background: radial-gradient(circle at 35% 35%, #FFD966, #D4AF37);
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .question-panel {
+            padding: 32px;
+        }
+        
+        .question-text {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #0a2540;
+            margin-bottom: 28px;
+        }
+        
+        .option-item {
+            border: 2px solid #95CAFA;
+            border-radius: 28px;
+            padding: 14px 24px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        
+        .option-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .option-item.selected {
+            border: 3px solid #2c7da0;
+            background: #e6f4ff;
+        }
+        
+        .action-buttons {
+            padding: 0 32px 32px;
+            display: flex;
+            gap: 18px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 44px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            background: #f1f5f9;
+            color: #1f2a44;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #0f2b3d;
+            color: white;
+            box-shadow: 0 5px 0 #05161f;
+        }
+        
+        .btn-primary:active {
+            transform: translateY(2px);
+        }
+        
+        .btn-primary:disabled {
+            background: #b9c8da;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .explanation-area {
+            margin: 5px 32px 25px;
+            padding: 14px 20px;
+            border-radius: 24px;
+        }
+        
+        .explanation-correct {
+            background: #e6f9e6;
+            color: #2b6e2b;
+            border-left: 6px solid #4caf50;
+        }
+        
+        .explanation-wrong {
+            background: #ffeaea;
+            color: #c7362b;
+            border-left: 6px solid #e34234;
+        }
+        
+        .lock-message {
+            background: #fff3e0;
+            padding: 30px;
+            text-align: center;
+            font-weight: 500;
+            color: #b85c00;
+            border-radius: 36px;
+            margin: 30px;
+        }
+        
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .product-card {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 2px solid #95CAFA;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .product-card.purchased {
+            opacity: 0.7;
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        
+        .product-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .product-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #0a2540;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d4af37;
+            margin: 10px 0;
+        }
+        
+        .product-price span {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .btn-shop {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #0f2b3d;
+            color: white;
+            border: none;
+            border-radius: 44px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .btn-shop:hover {
+            background: #1e4a6b;
+            transform: translateY(-2px);
+        }
+        
+        .btn-shop:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-download {
+            background: #4caf50;
+        }
+        
+        .btn-download:hover {
+            background: #45a049;
+        }
+        
+        .purchased-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .animate-pop {
+            animation: pop 0.3s ease;
+        }
+        
+        .shop-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .btn-secondary {
+            background: #ffb347;
+            color: #2d1b00;
+            box-shadow: none;
+        }
+        
+        .btn-secondary:hover {
+            background: #ff9f1a;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+<div class="trainer-container" id="app"></div>
+
+<script>
+    // Вопросы для тренажера 3
+    const QUESTIONS3 = [
+        {
+            text: "Какой срок хранения кассовых документов в организации?",
+            options: ["1 год", "3 года", "5 лет"],
+            correct: 2,
+            explanation: "Кассовые документы должны храниться не менее 5 лет."
+        },
+        {
+            text: "Что делать при обнаружении недостачи в кассе?",
+            options: ["Списать на убытки", "Взыскать с материально-ответственного лица", "Увеличить лимит"],
+            correct: 1,
+            explanation: "Недостача взыскивается с кассира (материально-ответственного лица)."
+        },
+        {
+            text: "Разрешено ли использовать кассовую технику без фискального накопителя?",
+            options: ["Да, если УСН", "Нет, запрещено", "Только при чеке"],
+            correct: 1,
+            explanation: "Кассовая техника должна быть зарегистрирована с фискальным накопителем."
+        },
+        {
+            text: "Кто имеет право подписывать кассовые документы?",
+            options: ["Главный бухгалтер и руководитель", "Любой сотрудник", "Кассир и директор"],
+            correct: 0,
+            explanation: "ПКО и РКО подписываются руководителем и главным бухгалтером (или кассиром)."
+        },
+        {
+            text: "В какой срок нужно сдавать наличные сверх лимита в банк?",
+            options: ["В течение 3 дней", "В дни инкассации или по окончании рабочего дня", "Раз в месяц"],
+            correct: 1,
+            explanation: "Сверхлимитная наличность сдаётся в банк в дни инкассации."
+        }
+    ];
+    
+    // Товары в магазине - ИСПРАВЛЕНО: теперь все файлы будут использоваться
+    const PRODUCTS = [
+        {
+            id: 1,
+            name: "Подарок 1",
+            price: 400,
+            description: "Полезная шпаргалка по кассовым операциям",
+            icon: "🎁",
+            fileName: "gift1.pdf"
+        },
+        {
+            id: 2,
+            name: "Подарок 2",
+            price: 800,
+            description: "Подробная инструкция по кассовой дисциплине",
+            icon: "🎁",
+            fileName: "gift2.pdf"
+        },
+        {
+            id: 3,
+            name: "Подарок 3",
+            price: 1200,
+            description: "Полный сборник материалов по кассовым операциям",
+            icon: "🎁",
+            fileName: "gift3.pdf"
+        }
+    ];
+    
+    const STORAGE_BALANCE3 = 'trainer3_balance';
+    const STORAGE_PROGRESS3 = 'trainer3_progress';
+    const STORAGE_COMPLETED3 = 'trainer3_completed';
+    const STORAGE_PURCHASED = 'trainer3_purchased';
+    
+    let balance = 0;
+    let currentIdx = 0;
+    let selected = null;
+    let checked = false;
+    let completed = false;
+    let showShop = false;
+    let purchased = [];
+    
+    function isTrainer2Completed() {
+        return localStorage.getItem('trainer2_completed') === 'true';
+    }
+    
+    function showMessage(text, isError = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message';
+        messageDiv.style.background = isError ? '#ffeaea' : '#e6f9e6';
+        messageDiv.style.color = isError ? '#c7362b' : '#2b6e2b';
+        messageDiv.style.borderLeft = isError ? '4px solid #c7362b' : '4px solid #4caf50';
+        messageDiv.innerHTML = text;
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
+    }
+    
+    // Функция для скачивания PDF из папки pdf/
+    function downloadPDF(fileName, productName) {
+        // Создаем ссылку на файл в папке pdf
+        const pdfUrl = `pdf/${fileName}`;
+        
+        // Проверяем, существует ли файл (пробуем загрузить)
+        fetch(pdfUrl, { method: 'HEAD' })
+            .then(response => {
+                if (response.ok) {
+                    // Файл существует - скачиваем
+                    const link = document.createElement('a');
+                    link.href = pdfUrl;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showMessage(`📥 "${productName}" успешно скачан!`);
+                } else {
+                    // Файл не найден - показываем сообщение
+                    showMessage(`⚠️ Файл "${fileName}" не найден. Убедитесь, что папка "pdf" и файлы загружены на GitHub.`, true);
+                    console.error(`Файл не найден: ${pdfUrl}`);
+                }
+            })
+            .catch(error => {
+                showMessage(`⚠️ Ошибка загрузки файла. Проверьте наличие папки "pdf" с файлами.`, true);
+                console.error('Ошибка:', error);
+            });
+    }
+    
+    function downloadGift(product) {
+        // Проверяем, куплен ли уже подарок
+        if (purchased.includes(product.id)) {
+            // Если уже куплен - скачиваем
+            downloadPDF(product.fileName, product.name);
+            return;
+        }
+        
+        // Проверяем достаточно ли монет
+        if (balance >= product.price) {
+            balance -= product.price;
+            purchased.push(product.id);
+            savePurchased();
+            updateBalanceUI();
+            
+            // Скачиваем PDF
+            downloadPDF(product.fileName, product.name);
+            
+            showMessage(`🎉 Поздравляем! Вы купили "${product.name}" за ${product.price} монет!`);
+            renderShop();
+        } else {
+            showMessage(`😔 Недостаточно монет! Нужно ${product.price} монет. У вас ${balance} монет.`, true);
+        }
+    }
+    
+    function savePurchased() {
+        localStorage.setItem(STORAGE_PURCHASED, JSON.stringify(purchased));
+        localStorage.setItem(STORAGE_BALANCE3, balance);
+    }
+    
+    function loadPurchased() {
+        const saved = localStorage.getItem(STORAGE_PURCHASED);
+        if (saved) {
+            purchased = JSON.parse(saved);
+        } else {
+            purchased = [];
+        }
+    }
+    
+    function resetAllTrainers() {
+        if (confirm('Вы уверены, что хотите полностью сбросить прогресс всех тренажёров? Это также сбросит все купленные подарки.')) {
+            localStorage.removeItem('trainer1_completed');
+            localStorage.removeItem('trainer1_balance');
+            localStorage.removeItem('trainer1_progress');
+            localStorage.removeItem('trainer2_completed');
+            localStorage.removeItem('trainer2_balance');
+            localStorage.removeItem('trainer2_progress');
+            localStorage.removeItem('trainer3_completed');
+            localStorage.removeItem('trainer3_balance');
+            localStorage.removeItem('trainer3_progress');
+            localStorage.removeItem(STORAGE_PURCHASED);
+            localStorage.setItem('trainer1_balance', '400');
+            window.location.reload();
+        }
+    }
+    
+    function restartGame() {
+        if (confirm('Вы хотите начать тренажеры заново? Это сбросит прогресс тренажеров, но купленные подарки останутся. Вы сможете накопить больше монет.')) {
+            localStorage.removeItem('trainer1_completed');
+            localStorage.removeItem('trainer1_balance');
+            localStorage.removeItem('trainer1_progress');
+            localStorage.removeItem('trainer2_completed');
+            localStorage.removeItem('trainer2_balance');
+            localStorage.removeItem('trainer2_progress');
+            localStorage.removeItem('trainer3_completed');
+            localStorage.removeItem('trainer3_balance');
+            localStorage.removeItem('trainer3_progress');
+            localStorage.setItem('trainer1_balance', '400');
+            window.location.reload();
+        }
+    }
+    
+    function loadData() {
+        let bal3 = localStorage.getItem(STORAGE_BALANCE3);
+        let bal2 = localStorage.getItem('trainer2_balance');
+        
+        if (bal3 !== null) {
+            balance = parseInt(bal3);
+        } else if (bal2 !== null) {
+            balance = parseInt(bal2);
+        } else {
+            balance = 400;
+        }
+        
+        let prog = localStorage.getItem(STORAGE_PROGRESS3);
+        if (prog) {
+            let p = JSON.parse(prog);
+            currentIdx = p.currentIdx || 0;
+            checked = p.checked || false;
+            completed = p.completed || false;
+        }
+        
+        if (localStorage.getItem(STORAGE_COMPLETED3) === 'true') {
+            completed = true;
+        }
+        
+        if (completed) {
+            currentIdx = QUESTIONS3.length;
+        } else if (currentIdx >= QUESTIONS3.length) {
+            currentIdx = 0;
+            checked = false;
+        }
+        
+        loadPurchased();
+    }
+    
+    function saveProgress() {
+        localStorage.setItem(STORAGE_PROGRESS3, JSON.stringify({
+            currentIdx: currentIdx,
+            checked: checked,
+            completed: completed
+        }));
+        localStorage.setItem(STORAGE_BALANCE3, balance);
+        localStorage.setItem(STORAGE_COMPLETED3, completed);
+    }
+    
+    function updateBalanceUI() {
+        let balSpan = document.querySelector('.balance-value');
+        if (balSpan) {
+            balSpan.innerText = balance;
+            balSpan.classList.add('animate-pop');
+            setTimeout(() => balSpan.classList.remove('animate-pop'), 300);
+        }
+        
+        let stack = document.querySelector('.coins-stack');
+        if (stack) {
+            stack.innerHTML = '';
+            let cnt = Math.min(8, Math.floor(Math.abs(balance) / 100) + 1);
+            if (cnt === 0 && balance > 0) cnt = 1;
+            for (let i = 0; i < cnt; i++) {
+                let c = document.createElement('span');
+                c.className = 'coin-icon';
+                c.innerText = '💰';
+                stack.appendChild(c);
+            }
+        }
+    }
+    
+    function changeBalance(delta) {
+        balance += delta;
+        updateBalanceUI();
+        saveProgress();
+        
+        let w = document.querySelector('.wallet');
+        if (w) {
+            w.style.transform = 'scale(1.02)';
+            setTimeout(() => { if(w) w.style.transform = ''; }, 200);
+        }
+    }
+    
+    function checkAnswer() {
+        if (checked || selected === null) return;
+        let isCor = (selected === QUESTIONS3[currentIdx].correct);
+        if (isCor) changeBalance(200);
+        else changeBalance(-300);
+        checked = true;
+        saveProgress();
+        render();
+    }
+    
+    function next() {
+        if (!checked) return;
+        if (currentIdx + 1 < QUESTIONS3.length) {
+            currentIdx++;
+            selected = null;
+            checked = false;
+            render();
+            saveProgress();
+        } else {
+            completed = true;
+            saveProgress();
+            render();
+        }
+    }
+    
+    function goToShop() {
+        showShop = true;
+        renderShop();
+    }
+    
+    function renderShop() {
+        let productsHtml = '';
+        PRODUCTS.forEach(product => {
+            const isPurchased = purchased.includes(product.id);
+            productsHtml += `
+                <div class="product-card ${isPurchased ? 'purchased' : ''}">
+                    <div class="product-icon">${product.icon}</div>
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-price">💰 ${product.price} <span>монет</span></div>
+                    <div style="color: #666; font-size: 0.9rem; margin: 10px 0;">${product.description}</div>
+                    ${isPurchased ? '<div class="purchased-badge">✅ Уже куплено</div>' : ''}
+                    <button class="btn-shop ${isPurchased ? 'btn-download' : ''}" onclick="window.downloadGiftFromGlobal(${product.id})">
+                        ${isPurchased ? '📥 Скачать' : '🛒 Купить'}
+                    </button>
+                </div>
+            `;
+        });
+        
+        const totalSpent = PRODUCTS.reduce((sum, p) => {
+            return purchased.includes(p.id) ? sum + p.price : sum;
+        }, 0);
+        
+        app.innerHTML = `
+            <div class="header-stats">
+                <div class="progress-area">🎁 Магазин подарков</div>
+                <div class="wallet">
+                    <div class="coins-stack"></div>
+                    <span class="balance-value">${balance}</span>
+                    <span>монет</span>
+                </div>
+            </div>
+            <div class="question-panel">
+                <h2 style="text-align: center; margin-bottom: 20px;">🎁 Потратьте монеты на подарки!</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                    У вас ${balance} монет. Потрачено на подарки: ${totalSpent} монет.
+                </p>
+                <div class="shop-grid">
+                    ${productsHtml}
+                </div>
+                <div class="shop-buttons">
+                    <button class="btn btn-secondary" onclick="window.restartGameFromGlobal()">🔄 Пройти тренажеры заново</button>
+                    <button class="btn btn-secondary" onclick="window.resetAllFromGlobal()">🗑️ Полный сброс прогресса</button>
+                </div>
+                <p style="text-align: center; color: #999; margin-top: 20px; font-size: 0.85rem;">
+                    💡 Если не хватает монет, пройдите тренажеры заново - вы можете накопить больше!
+                </p>
+            </div>
+        `;
+        updateBalanceUI();
+    }
+    
+    function render() {
+        let trainer2ok = isTrainer2Completed();
+        
+        if (!trainer2ok) {
+            app.innerHTML = `
+                <div class="trainer-container">
+                    <div class="lock-message">
+                        🔒 Пройдите тренажёр 2, чтобы открыть финальный модуль.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        if (completed && !showShop) {
+            let overallBalance = balance;
+            let message = overallBalance >= 0 
+                ? "🏆 Блестящий результат! Вы отлично усвоили кассовые операции." 
+                : "⚠️ Рекомендуем повторить материал по кассовой дисциплине.";
+            
+            app.innerHTML = `
+                <div class="header-stats">
+                    <div class="progress-area">Итоговый тренажёр</div>
+                    <div class="wallet">
+                        <div class="coins-stack"></div>
+                        <span class="balance-value">${overallBalance}</span>
+                        <span>монет</span>
+                    </div>
+                </div>
+                <div class="question-panel">
+                    <div style="background: #eef2ff; border-radius: 32px; padding: 30px; text-align: center;">
+                        <h3>🎓 Обучение завершено!</h3>
+                        <p style="margin: 20px 0; font-size: 1.1rem;">${message}</p>
+                        <p style="font-size: 1.3rem; font-weight: bold; margin: 20px 0;">
+                            <strong>Финальный баланс: ${overallBalance} монет</strong>
+                        </p>
+                        <p style="font-size: 1.2rem;">
+                            ${overallBalance >= 0 ? '🌟 Молодец! 🌟' : '📚 Нужно подтянуть знания 📚'}
+                        </p>
+                        ${overallBalance > 0 ? `
+                            <button id="goToShopBtn" class="btn btn-primary" style="margin-top: 20px; background: #ffb347; color: #2d1b00; box-shadow: none;">
+                                🎁 Перейти в магазин подарков (${overallBalance} монет)
+                            </button>
+                        ` : `
+                            <button id="restartBtn" class="btn btn-primary" style="margin-top: 20px; background: #ffb347; color: #2d1b00; box-shadow: none;">
+                                🔄 Пройти тренажеры заново
+                            </button>
+                        `}
+                        <button id="resetGlobalBtn" class="btn reset-all-btn" style="margin-top: 15px;">🗑️ Полный сброс прогресса</button>
+                    </div>
+                </div>
+            `;
+            updateBalanceUI();
+            
+            document.getElementById('goToShopBtn')?.addEventListener('click', goToShop);
+            document.getElementById('restartBtn')?.addEventListener('click', restartGame);
+            document.getElementById('resetGlobalBtn')?.addEventListener('click', resetAllTrainers);
+            return;
+        }
+        
+        if (completed && showShop) {
+            renderShop();
+            return;
+        }
+        
+        let q = QUESTIONS3[currentIdx];
+        let optsHtml = '';
+        
+        q.options.forEach((opt, i) => {
+            let st = '';
+            if (checked) {
+                if (i === q.correct) {
+                    st = 'border-color: #a5d6a5; background: #e9f7e1;';
+                } else if (i === selected && i !== q.correct) {
+                    st = 'border-color: #f5acac; background: #ffe6e6;';
+                }
+            }
+            const selectedClass = (selected === i) ? 'selected' : '';
+            optsHtml += `<div class="option-item ${selectedClass}" data-idx="${i}" style="${st}">${opt}</div>`;
+        });
+        
+        let expl = '';
+        if (checked) {
+            let corr = (selected === q.correct);
+            expl = `
+                <div class="explanation-area ${corr ? 'explanation-correct' : 'explanation-wrong'}">
+                    <strong>${corr ? '✅ Верно' : '❌ Ошибка'}</strong><br>
+                    ${q.explanation}
+                </div>
+            `;
+        }
+        
+        app.innerHTML = `
+            <div class="header-stats">
+                <div class="progress-area">Вопрос ${currentIdx+1}/${QUESTIONS3.length}</div>
+                <div class="wallet">
+                    <div class="coins-stack"></div>
+                    <span class="balance-value">${balance}</span>
+                    <span>монет</span>
+                </div>
+            </div>
+            <div class="question-panel">
+                <div class="question-text">${q.text}</div>
+                <div class="options-list">${optsHtml}</div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="checkBtn" ${checked || selected === null ? 'disabled' : ''}>Проверить</button>
+                <button class="btn" id="nextBtn" ${!checked ? 'disabled' : ''}>Далее →</button>
+            </div>
+            ${expl}
+        `;
+        
+        document.querySelectorAll('.option-item').forEach(el => {
+            el.addEventListener('click', () => {
+                if (!checked) {
+                    selected = parseInt(el.dataset.idx);
+                    render();
+                }
+            });
+        });
+        
+        document.getElementById('checkBtn')?.addEventListener('click', checkAnswer);
+        document.getElementById('nextBtn')?.addEventListener('click', next);
+        updateBalanceUI();
+    }
+    
+    // Глобальные функции для вызова из onclick
+    window.downloadGiftFromGlobal = function(productId) {
+        const product = PRODUCTS.find(p => p.id === productId);
+        if (product) {
+            downloadGift(product);
+        }
+    };
+    
+    window.restartGameFromGlobal = restartGame;
+    window.resetAllFromGlobal = resetAllTrainers;
+    
+    const app = document.getElementById('app');
+    loadData();
+    render();
+</script>
+</body>
+</html>
